@@ -668,6 +668,10 @@ size_t VSICurlHandleWriteFunc( void *buffer, size_t count,
             {
                 psStruct->bFoundContentRange = true;
             }
+            else if( STARTS_WITH_CI(pszLine, "Content-Range:") )
+            {
+                psStruct->bFoundContentRange = true;
+            }
             else if( STARTS_WITH_CI(pszLine, "Date: ") )
             {
                 CPLString osDate = pszLine + strlen("Date: ");
@@ -1328,6 +1332,9 @@ retry:
                 if( pszContentRange == nullptr )
                     pszContentRange = strstr(sWriteFuncHeaderData.pBuffer,
                            "content-range: bytes ");
+                if( pszContentRange == nullptr )
+                    pszContentRange = strstr(sWriteFuncHeaderData.pBuffer,
+                           "Content-Range:bytes ");
                 if( pszContentRange )
                     pszContentRange = strchr(pszContentRange, '/');
                 if( pszContentRange )
@@ -1819,6 +1826,9 @@ retry:
         if( pszContentRange == nullptr )
             pszContentRange = strstr(sWriteFuncHeaderData.pBuffer,
                                      "content-range: bytes ");
+        if( pszContentRange == nullptr )
+            pszContentRange = strstr(sWriteFuncHeaderData.pBuffer,
+                                     "Content-Range:bytes ");
         if( pszContentRange )
         {
             char* pszEOL = strchr(pszContentRange, '\n');
@@ -2605,6 +2615,11 @@ int VSICurlHandle::ReadMultiRangeSingleGet(
             }
 
             if( STARTS_WITH_CI(pszNext, "Content-Range: bytes ") )
+            {
+                bExpectedRange = true; /* FIXME */
+            }
+
+            if( STARTS_WITH_CI(pszNext, "Content-Range:bytes ") )
             {
                 bExpectedRange = true; /* FIXME */
             }
